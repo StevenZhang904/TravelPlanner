@@ -8,7 +8,7 @@ if __name__ == '__main__':
     
     parser = argparse.ArgumentParser()
     parser.add_argument("--set_type", type=str, default="validation")
-    parser.add_argument("--model_name", type=str, default="gpt-3.5-turbo-1106")
+    parser.add_argument("--model_name", type=str, default="gpt-4o")
     parser.add_argument("--mode", type=str, default="two-stage")
     parser.add_argument("--strategy", type=str, default="direct")
     parser.add_argument("--output_dir", type=str, default="./")

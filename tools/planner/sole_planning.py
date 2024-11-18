@@ -56,13 +56,13 @@ def catch_openai_api_error():
 
 if __name__ == "__main__":
 
-    # model_name= ['gpt-3.5-turbo-1106','gpt-4-1106-preview','gemini','mixtral'][1]
+    # model_name= ['gpt-4o','gemini','mixtral'][1]
     # set_type = ['dev','test'][0]
     # strategy = ['direct','cot','react','reflexion'][0]
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--set_type", type=str, default="validation")
-    parser.add_argument("--model_name", type=str, default="gpt-3.5-turbo-1106")
+    parser.add_argument("--model_name", type=str, default="gpt-4o")
     parser.add_argument("--output_dir", type=str, default="./")
     parser.add_argument("--strategy", type=str, default="direct")
     args = parser.parse_args()

@@ -51,27 +51,27 @@ class Planner:
     def __init__(self,
                  # args,
                  agent_prompt: PromptTemplate = planner_agent_prompt,
-                 model_name: str = 'gpt-3.5-turbo-1106',
+                 model_name: str = 'gpt-4o',
                  ) -> None:
 
         self.agent_prompt = agent_prompt
         self.scratchpad: str = ''
         self.model_name = model_name
-        self.enc = tiktoken.encoding_for_model("gpt-3.5-turbo")
+        self.enc = tiktoken.encoding_for_model("gpt-4o")
 
         if model_name in  ['mistral-7B-32K']:
             self.llm = ChatOpenAI(temperature=0,
                      max_tokens=4096,
                      openai_api_key="EMPTY", 
                      openai_api_base="http://localhost:8301/v1", 
-                     model_name="gpt-3.5-turbo")
+                     model_name="gpt-4o")
         
         elif model_name in  ['ChatGLM3-6B-32K']:
             self.llm = ChatOpenAI(temperature=0,
                      max_tokens=4096,
                      openai_api_key="EMPTY", 
                      openai_api_base="http://localhost:8501/v1", 
-                     model_name="gpt-3.5-turbo")
+                     model_name="gpt-4o")
             
         elif model_name in ['mixtral']:
             self.max_token_length = 30000
@@ -113,7 +113,7 @@ class ReactPlanner:
     """
     def __init__(self,
                  agent_prompt: PromptTemplate = react_planner_agent_prompt,
-                 model_name: str = 'gpt-3.5-turbo-1106',
+                 model_name: str = 'gpt-4o',
                  ) -> None:
         
         self.agent_prompt = agent_prompt
@@ -124,7 +124,7 @@ class ReactPlanner:
         self.reset()
         self.finished = False
         self.answer = ''
-        self.enc = tiktoken.encoding_for_model("gpt-3.5-turbo")
+        self.enc = tiktoken.encoding_for_model("gpt-4o")
 
     def run(self, text, query, reset = True) -> None:
 
@@ -219,7 +219,7 @@ class ReactReflectPlanner:
     def __init__(self,
                  agent_prompt: PromptTemplate = react_reflect_planner_agent_prompt,
                 reflect_prompt: PromptTemplate = reflect_prompt,
-                 model_name: str = 'gpt-3.5-turbo-1106',
+                 model_name: str = 'gpt-4o',
                  ) -> None:
         
         self.agent_prompt = agent_prompt
@@ -239,7 +239,7 @@ class ReactReflectPlanner:
         self.answer = ''
         self.reflections: List[str] = []
         self.reflections_str: str = ''
-        self.enc = tiktoken.encoding_for_model("gpt-3.5-turbo")
+        self.enc = tiktoken.encoding_for_model("gpt-4o")
 
     def run(self, text, query, reset = True) -> None:
 

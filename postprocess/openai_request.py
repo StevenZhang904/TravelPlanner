@@ -28,12 +28,15 @@ def timeout_handler(signum, frame):
 @func_set_timeout(120)
 def limited_execution_time(func,model,prompt,temp,max_tokens=2048, default=None,**kwargs):
     try:
-        if 'gpt-3.5-turbo' in model or 'gpt-4' in model:
+        if 'gpt-4o' in model:
             result = func(
                     model=model,
                     messages=prompt,
                     temperature=temp
                 )
+        elif 'gpt-3.5' in model:
+            print('gpt-3.5 is not supported; postprocess/openai_request.py limited_execution_time')
+            raise NotImplementedError
         else:
             result = func(model=model,prompt=prompt,max_tokens=max_tokens,**kwargs)
     except func_timeout.exceptions.FunctionTimedOut:
@@ -61,13 +64,15 @@ def batchify(data: Iterable[T], batch_size: int) -> Iterable[List[T]]:
 
 
 def openai_unit_price(model_name,token_type="prompt"):
-    if 'gpt-4' in model_name:
+    if 'gpt-4' == model_name:
         if token_type=="prompt":
             unit = 0.03
         elif token_type=="completion":
             unit = 0.06
         else:
             raise ValueError("Unknown type")
+    elif 'gpt-4o' == model_name:
+        unit = 0.001
     elif 'gpt-3.5-turbo' in model_name:
         unit = 0.002
     elif 'davinci' in model_name:
@@ -171,7 +176,7 @@ def prompt_gpt3(prompt_input: list, save_path,model_name='text-davinci-003', max
 
 
 
-def prompt_chatgpt(system_input, user_input, temperature,save_path,index,history=[], model_name='gpt-4-1106-preview'):
+def prompt_chatgpt(system_input, user_input, temperature,save_path,index,history=[], model_name='gpt-4o'):
     '''
     :param system_input: "You are a helpful assistant/translator."
     :param user_input: you texts here
@@ -233,7 +238,7 @@ JSON\n"""
         prompt_list.append(prompt)
     return prompt_list
 
-def build_plan_format_conversion_prompt(directory, set_type='validation',model_name='gpt4',strategy='direct',mode='two-stage'):
+def build_plan_format_conversion_prompt(directory, set_type='validation',model_name='gpt4o',strategy='direct',mode='two-stage'):
     prompt_list = []
     prefix = """Please assist me in extracting valid information from a given natural language text and reconstructing it in JSON format, as demonstrated in the following example. If transportation details indicate a journey from one city to another (e.g., from A to B), the 'current_city' should be updated to the destination city (in this case, B). Use a ';' to separate different attractions, with each attraction formatted as 'Name, City'. If there's information about transportation, ensure that the 'current_city' aligns with the destination mentioned in the transportation details (i.e., the current city should follow the format 'from A to B'). Also, ensure that all flight numbers and costs are followed by a colon (i.e., 'Flight Number:' and 'Cost:'), consistent with the provided example. Each item should include ['day', 'current_city', 'transportation', 'breakfast', 'attraction', 'lunch', 'dinner', 'accommodation']. Replace non-specific information like 'eat at home/on the road' with '-'. Additionally, delete any '$' symbols.
 -----EXAMPLE-----

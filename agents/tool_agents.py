@@ -68,8 +68,8 @@ class ReactAgent:
                  max_steps: int = 30,
                  max_retries: int = 3,
                  illegal_early_stop_patience: int = 3,
-                 react_llm_name = 'gpt-3.5-turbo-1106',
-                 planner_llm_name = 'gpt-3.5-turbo-1106',
+                 react_llm_name = 'gpt-4o',
+                 planner_llm_name = 'gpt-4o',
                 #  logs_path = '../logs/',
                  city_file_path = '../database/background/citySet.txt'
                  ) -> None: 
@@ -89,23 +89,24 @@ class ReactAgent:
         self.current_observation = ''
         self.current_data = None
 
-        if 'gpt-3.5' in react_llm_name:
-            stop_list = ['\n']
-            self.max_token_length = 15000
-            self.llm = ChatOpenAI(temperature=1,
-                     max_tokens=256,
-                     model_name=react_llm_name,
-                     openai_api_key=OPENAI_API_KEY,
-                     model_kwargs={"stop": stop_list})
-            
-        elif 'gpt-4' in react_llm_name:
+        # if 'gpt-4' in react_llm_name:
+        #     stop_list = ['\n']
+        #     self.max_token_length = 30000
+        #     self.llm = ChatOpenAI(temperature=0,
+        #              max_tokens=256,
+        #              model_name=react_llm_name,
+        #              openai_api_key=OPENAI_API_KEY,
+        #              model_kwargs={"stop": stop_list})
+        
+        if 'gpt-4o' == react_llm_name:
             stop_list = ['\n']
             self.max_token_length = 30000
+            ### TODO: Keep with 30000 to be consistent with the other models and the original implementation
             self.llm = ChatOpenAI(temperature=0,
-                     max_tokens=256,
-                     model_name=react_llm_name,
-                     openai_api_key=OPENAI_API_KEY,
-                     model_kwargs={"stop": stop_list})
+                        max_tokens=256,
+                        model_name=react_llm_name,
+                        openai_api_key=OPENAI_API_KEY,
+                        model_kwargs={"stop": stop_list})
             
         elif react_llm_name in ['mistral-7B-32K']:
             stop_list = ['\n']
@@ -114,7 +115,7 @@ class ReactAgent:
                      max_tokens=256,
                      openai_api_key="EMPTY", 
                      openai_api_base="http://localhost:8301/v1", 
-                     model_name="gpt-3.5-turbo",
+                     model_name="gpt-4o",
                      model_kwargs={"stop": stop_list})
             
         elif react_llm_name in ['mixtral']:
@@ -124,7 +125,7 @@ class ReactAgent:
                      max_tokens=256,
                      openai_api_key="EMPTY", 
                      openai_api_base="http://localhost:8501/v1", 
-                     model_name="gpt-3.5-turbo",
+                     model_name="gpt-4o",
                      model_kwargs={"stop": stop_list})
             
         elif react_llm_name in ['ChatGLM3-6B-32K']:
@@ -135,13 +136,15 @@ class ReactAgent:
                      max_tokens=256,
                      openai_api_key="EMPTY", 
                      openai_api_base="http://localhost:8501/v1", 
-                     model_name="gpt-3.5-turbo",
+                     model_name="gpt-4o",
                      model_kwargs={"stop": stop_list})
         
         elif react_llm_name in ['gemini']:
             self.llm = ChatGoogleGenerativeAI(temperature=0,model="gemini-pro",google_api_key=GOOGLE_API_KEY)
             self.max_token_length = 30000
 
+        else:
+            raise ValueError(f"Model {react_llm_name} not supported.")
 
         self.illegal_early_stop_patience = illegal_early_stop_patience
 
@@ -161,7 +164,7 @@ class ReactAgent:
 
         self.city_set = self.load_city(city_set_path=city_file_path)
 
-        self.enc = tiktoken.encoding_for_model("gpt-3.5-turbo")
+        self.enc = tiktoken.encoding_for_model("gpt-4o")
 
         self.__reset_agent()
 
@@ -515,8 +518,8 @@ class ReactAgent:
         return city_set
 
 ### String Stuff ###
-gpt2_enc = tiktoken.encoding_for_model("text-davinci-003")
-
+# gpt2_enc = tiktoken.encoding_for_model("text-davinci-003")
+gpt4o_enc = tiktoken.encoding_for_model("gpt-4o")
 
 def parse_action(string):
     pattern = r'^(\w+)\[(.+)\]$'
@@ -538,11 +541,11 @@ def format_step(step: str) -> str:
 
 
 
-def truncate_scratchpad(scratchpad: str, n_tokens: int = 1600, tokenizer=gpt2_enc) -> str:
+def truncate_scratchpad(scratchpad: str, n_tokens: int = 1600, tokenizer=gpt4o_enc) -> str:
     lines = scratchpad.split('\n')
     observations = filter(lambda x: x.startswith('Observation'), lines)
     observations_by_tokens = sorted(observations, key=lambda x: len(tokenizer.encode(x)))
-    while len(gpt2_enc.encode('\n'.join(lines))) > n_tokens:
+    while len(gpt4o_enc.encode('\n'.join(lines))) > n_tokens:
         largest_observation = observations_by_tokens.pop(-1)
         ind = lines.index(largest_observation)
         lines[ind] = largest_observation.split(':')[0] + ': [truncated wikipedia excerpt]'
@@ -635,10 +638,10 @@ def to_string(data) -> str:
 if __name__ == '__main__':
 
     tools_list = ["notebook","flights","attractions","accommodations","restaurants","googleDistanceMatrix","planner","cities"]
-    # model_name = ['gpt-3.5-turbo-1106','gpt-4-1106-preview','gemini','mistral-7B-32K','mixtral','ChatGLM3-6B-32K'][2]
+    # model_name = ['gpt-4o','gemini','mistral-7B-32K','mixtral','ChatGLM3-6B-32K'][2]
     parser = argparse.ArgumentParser()
     parser.add_argument("--set_type", type=str, default="validation")
-    parser.add_argument("--model_name", type=str, default="gpt-3.5-turbo-1106")
+    parser.add_argument("--model_name", type=str, default="gpt-4o")
     parser.add_argument("--output_dir", type=str, default="./")
     args = parser.parse_args()
     if args.set_type == 'validation':

@@ -65,6 +65,7 @@ if __name__ == "__main__":
     parser.add_argument("--model_name", type=str, default="gpt-4o")
     parser.add_argument("--output_dir", type=str, default="./")
     parser.add_argument("--strategy", type=str, default="direct")
+    parser.add_argument("--num_sample", type=int, default=-1)
     args = parser.parse_args()
     directory = f'{args.output_dir}/{args.set_type}'
     if args.set_type == 'train':
@@ -73,7 +74,13 @@ if __name__ == "__main__":
         query_data_list  = load_dataset('osunlp/TravelPlanner','validation')['validation']
     elif args.set_type == 'test':
         query_data_list  = load_dataset('osunlp/TravelPlanner','test')['test']
-    numbers = [i for i in range(1,len(query_data_list)+1)]
+        
+    if args.num_sample == -1:  
+        numbers = [i for i in range(1,len(query_data_list)+1)]
+    elif args.num_sample > 0:
+        numbers = [i for i in range(1,args.num_sample+1)]
+    else:
+        raise ValueError("num_sample should be positive integer or -1")
 
     if args.strategy == 'direct':
         planner = Planner(model_name=args.model_name, agent_prompt=planner_agent_prompt)

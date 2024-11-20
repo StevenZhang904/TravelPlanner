@@ -191,10 +191,10 @@ def prompt_chatgpt(system_input, user_input, temperature,save_path,index,history
     history.append({"role": "user", "content": user_input})
     while True:
         try:
-            completion = limited_execution_time(openai.ChatCompletion.create,
+            completion = openai.ChatCompletion.create(
                 model=model_name,
-                prompt=history,
-                temp=temperature)
+                messages=history,
+                temperature=temperature)
             if completion is None:
                 raise TimeoutError
             break

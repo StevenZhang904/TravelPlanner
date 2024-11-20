@@ -1,5 +1,6 @@
 ### Attractions
 
+## NOTE: Website and Phone fields are removed for the train postprocessed files to reduce contexts.
 1. **Name**: The name of the attraction.
 2. **Latitude**: The geographical latitude where the attraction is located.
 3. **Longitude**: The geographical longitude where the attraction is located.
